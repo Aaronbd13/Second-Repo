@@ -7,7 +7,7 @@ on:
 
 jobs: 
   run-inline:
-    runs-on: ubunutu latest
+    runs-on: ubuntu latest
     steps: 
       - name: Execute Inline Python
         run: python -c "print('Hello World!')"
