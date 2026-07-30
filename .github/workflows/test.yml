@@ -27,4 +27,4 @@ jobs:
 
     - name: Run tests with Pytest
       run: |
-        pytest
+        pytest testserver.py
