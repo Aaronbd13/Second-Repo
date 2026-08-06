@@ -1,0 +1,59 @@
+name=docker-compose.yml url=https://github.com/Aaronbd13/Second-Repo/blob/main/docker-compose.yml
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/testdb
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  testserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testserver
+    command: /bin/sh -c "flask db upgrade && pytest"
+    environment:
+      - FLASK_APP=app.py
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/testdb
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
